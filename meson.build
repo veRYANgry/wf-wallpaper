@@ -9,6 +9,6 @@ plugin_wallpaper = shared_module('wallpaper',
 	'wallpaper.cpp',
 	dependencies: [wayfire, wlroots, pixbuf],
 	install: true,
-	install_dir: 'lib/wayfire')
+	install_dir: '/usr/lib/wayfire')
 
-install_data('wallpaper.xml', install_dir: 'share/wayfire/metadata')
+install_data('wallpaper.xml', install_dir: '/usr/share/wayfire/metadata')

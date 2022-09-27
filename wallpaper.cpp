@@ -577,7 +577,7 @@ struct wallpaper_config {
 
 	void reset_views() { views.clear(); }
 
-	bool match_add_view(int idx, nonstd::observer_ptr<wallpaper_view_t> ptr) {
+	bool match_add_view(int idx, nonstd::observer_ptr<wallpaper_view_t> ptr, char* outputName) {
 		bool matches = (std::string)workspaces == wildcard;
 		if (!matches) {
 			std::stringstream ss(workspaces);
@@ -589,6 +589,7 @@ struct wallpaper_config {
 				if (ss.peek() == ',' || std::isspace((char)ss.peek(), std::locale::classic())) ss.ignore();
 			}
 		}
+		matches = matches && std::string(outputName) == (std::string)outputs;
 		if (matches) {
 			views.push_back(ptr);
 			ptr->set_to(loadable);
@@ -596,7 +597,7 @@ struct wallpaper_config {
 			ptr->set_sizing_mode(sizing_mode);
 			ptr->frameskip = frameskip;
 		}
-		LOGI((std::string)path, " matching ", idx, " - ", matches);
+		LOGI((std::string)path, " matching ", idx, " - ", matches," output: " , outputName);
 		return matches;
 	}
 };
@@ -615,7 +616,7 @@ struct wayfire_wallpaper : public wf::singleton_plugin_t<loadable_cache_t> {
 	std::map<std::string, wallpaper_config> confs;
 	std::vector<nonstd::observer_ptr<wallpaper_config>> confs_order;
 
-	void load_config() {
+	void load_config(char* outputName) {
 		confs_order.clear();
 		auto &config = wf::get_core().config;
 		for (auto &sec : config.get_all_sections()) {
@@ -645,7 +646,7 @@ struct wayfire_wallpaper : public wf::singleton_plugin_t<loadable_cache_t> {
 		int idx = 0;
 		for (auto view : ws_views) {
 			for (auto conf : confs_order) {
-				if (conf->match_add_view(idx, view)) {
+				if (conf->match_add_view(idx, view, outputName)) {
 					break;
 				}
 			}
@@ -653,7 +654,7 @@ struct wayfire_wallpaper : public wf::singleton_plugin_t<loadable_cache_t> {
 		}
 	}
 
-	wf::signal_connection_t reload_config{[this](wf::signal_data_t *sigdata) { load_config(); }};
+	wf::signal_connection_t reload_config{[this](wf::signal_data_t *sigdata) { load_config(output->handle->name); }};
 
 	wf::signal_connection_t workspace_changed{[this](wf::signal_data_t *sigdata) {
 		// Do what workspace impl's set_workspace does for fixed_views
@@ -716,7 +717,7 @@ struct wayfire_wallpaper : public wf::singleton_plugin_t<loadable_cache_t> {
 				ws_views[x + data->new_grid_size.width * y]->damage();
 			}
 		}
-		load_config();
+		load_config(output->handle->name);
 	}};
 
 	wf::effect_hook_t tick_animations = [=]() {
@@ -766,14 +767,14 @@ struct wayfire_wallpaper : public wf::singleton_plugin_t<loadable_cache_t> {
 				    {x * og.width, y * og.height, og.width, og.height});
 			}
 		}
-
+		
 		output->connect_signal("workspace-grid-changed", &workspace_grid_changed);
 		output->connect_signal("output-configuration-changed", &output_configuration_changed);
 		output->connect_signal("workspace-changed", &workspace_changed);
 		output->connect_signal("pre-remove", &pre_remove);
 		output->render->add_effect(&tick_animations, wf::OUTPUT_EFFECT_PRE);
 		wf::get_core().connect_signal("reload-config", &reload_config);
-		load_config();
+		load_config(output->handle->name);
 	}
 
 	void clear() {

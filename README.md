@@ -2,7 +2,7 @@
 
 Advanced wallpaper plugin for [Wayfire].
 
-- Lets you have multiple wallpaper configurations that can target specific workspaces (TODO on specific outputs)
+- Lets you have multiple wallpaper configurations that can target specific workspaces and a specific output
 - Loads images using gdk-pixbuf (so you can install [webp-pixbuf-loader] etc. to expand the supported formats list)
 	- in a subprocess, so a crash in the image loader won't bring the whole desktop down
 - Also supports [Shadertoy] style GLSL shaders as wallpapers (TODO animation, mouse, etc.)
