@@ -403,7 +403,7 @@ struct wallpaper_view_t : public wf::color_rect_view_t {
 		on_something_loaded();
 	}
 
-	void render_renderable(renderable_t &rbl, const wf::framebuffer_t &fb, const float blend,
+	void render_renderable(renderable_t &rbl, const wf::render_target_t &fb, const float blend,
 	                       fast_mono_clock::time_point &start_time, int64_t frames) {
 		std::visit(
 		    [&](auto &&arg) {
@@ -458,7 +458,7 @@ struct wallpaper_view_t : public wf::color_rect_view_t {
 		       (from && from->renderable && check_renderable<R>(*from->renderable, cb));
 	}
 
-	void simple_render(const wf::framebuffer_t &fb, int x, int y,
+	void simple_render(const wf::render_target_t &fb, int x, int y,
 	                   const wf::region_t &damage) override {
 		OpenGL::render_begin(fb);
 		for (auto &box : damage) {
