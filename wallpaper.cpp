@@ -744,10 +744,10 @@ struct wayfire_wallpaper : public wf::singleton_plugin_t<loadable_cache_t> {
 	nonstd::observer_ptr<wallpaper_view_t> new_view() {
 		auto view = std::make_unique<wallpaper_view_t>();
 		nonstd::observer_ptr<wallpaper_view_t> obs{view};
-		view->set_output(output);
 		view->role = wf::VIEW_ROLE_DESKTOP_ENVIRONMENT;
-		output->workspace->add_view(view, wf::LAYER_BACKGROUND);
 		wf::get_core().add_view(std::move(view));
+		obs->set_output(output);
+		output->workspace->add_view(obs, wf::LAYER_BACKGROUND);
 		return obs;
 	}
 
